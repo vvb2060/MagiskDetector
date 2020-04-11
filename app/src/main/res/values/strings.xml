@@ -1,25 +1,25 @@
 <resources>
     <string name="app_name">Magisk Detector</string>
 
-    <string name="test1">检测是否存在/sbin/su</string>
-    <string name="test1_t">存在/sbin/su</string>
-    <string name="test1_f">不存在/sbin/su</string>
+    <string name="test1">Check if /sbin/su file exists</string>
+    <string name="test1_t">Exists /sbin/su</string>
+    <string name="test1_f">/sbin/su does not exist</string>
 
-    <string name="test2">检测是否有系统文件被Magisk模块修改</string>
-    <string name="test2_0">未发现被Magisk模块修改的系统文件</string>
-    <string name="test2_1">至少一个系统文件被Magisk模块修改</string>
-    <string name="test2_d">检测出现意外</string>
+    <string name="test2">Check if the system file is modified by Magisk module</string>
+    <string name="test2_0">No system file modified by Magisk module</string>
+    <string name="test2_1">Magisk module modified at least one system file</string>
+    <string name="test2_d">Unexpected</string>
 
-    <string name="test3">检测Magisk的su进程数量</string>
-    <string name="test3_0">未发现正在运行的su进程</string>
-    <string name="test3_1">检测出现意外</string>
-    <string name="test3_2">SELinux为宽容状态，系统已被严重修改</string>
-    <string name="test3_3">此检测方式不支持Android10及以上系统</string>
-    <string name="test3_d">发现 %1$d 个正在运行的su进程</string>
+    <string name="test3">Detect the number of Magisk su processes</string>
+    <string name="test3_0">No running su process found</string>
+    <string name="test3_1">Unexpected</string>
+    <string name="test3_2">SELinux is permissive, the system is broken</string>
+    <string name="test3_3">This detection method does not support Android10+</string>
+    <string name="test3_d">Found %1$d running su processes</string>
 
-    <string name="test4">检测Magisk Hide工作状态</string>
-    <string name="test4_t">Magisk Hide未工作</string>
-    <string name="test4_f">Magisk Hide工作正常</string>
+    <string name="test4">Check Magisk Hide working status</string>
+    <string name="test4_t">Magisk Hide is not working</string>
+    <string name="test4_f">Magisk Hide works fine</string>
 
-    <string name="display">%1$s\n\n检测结果：%2$s</string>
+    <string name="display">%1$s\n\nTest results: %2$s</string>
 </resources>
