@@ -17,7 +17,7 @@ static inline void scanMountinfo() {
     FILE *fp = NULL;
     char line[PATH_MAX];
     char mountinfo[] = "/proc/self/mountinfo";
-    int fd = sys_openat(AT_FDCWD, mountinfo, O_RDONLY, 0);
+    int fd = sys_open(mountinfo, O_RDONLY, 0);
     if (fd < 0) {
         LOGE("cannot open %s", mountinfo);
         return;
@@ -41,7 +41,7 @@ static inline jint scanMaps() {
     FILE *fp = NULL;
     char line[PATH_MAX];
     char maps[] = "/proc/self/maps";
-    int fd = sys_openat(AT_FDCWD, maps, O_RDONLY, 0);
+    int fd = sys_open(maps, O_RDONLY, 0);
     if (fd < 0) {
         LOGE("cannot open %s", maps);
         return -1;
@@ -94,7 +94,7 @@ static inline jint scanNet() {
     FILE *fp = NULL;
     char line[PATH_MAX];
     char net[] = "/proc/net/unix";
-    int fd = sys_openat(AT_FDCWD, net, O_RDONLY, 0);
+    int fd = sys_open(net, O_RDONLY, 0);
     if (fd < 0) {
         LOGE("cannot open %s", net);
         if (android_get_device_api_level() >= __ANDROID_API_Q__) return -3;
@@ -116,6 +116,7 @@ static inline jint scanNet() {
         rstrip(name);
         if (strchr(name, ':') != NULL) continue;
         if (connectMagiskd(name) == 0) {
+            LOGW("%s connected", name);
             if (strcmp(name, "time_genoff") == 0) return -2;
             else count++;
         }
