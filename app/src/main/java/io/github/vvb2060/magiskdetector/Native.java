@@ -1,8 +1,6 @@
 package io.github.vvb2060.magiskdetector;
 
-import android.app.Application;
-
-public class App extends Application {
+public class Native {
     static {
         System.loadLibrary("vvb2060");
     }

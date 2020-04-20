@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdlib.h>
 #include <malloc.h>
 #include <jni.h>
 #include <sys/un.h>
@@ -170,7 +171,7 @@ jint JNI_OnLoad(JavaVM *jvm, void *v __unused) {
         return JNI_ERR;
     }
 
-    if ((clazz = (*env)->FindClass(env, "io/github/vvb2060/magiskdetector/App")) == NULL) {
+    if ((clazz = (*env)->FindClass(env, "io/github/vvb2060/magiskdetector/Native")) == NULL) {
         return JNI_ERR;
     }
 

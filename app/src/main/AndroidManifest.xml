@@ -9,7 +9,9 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.DeviceDefault"
-        tools:ignore="AllowBackup,MissingApplicationIcon">
+        android:zygotePreloadName="io.github.vvb2060.magiskdetector.AppZygote"
+        tools:ignore="AllowBackup,MissingApplicationIcon"
+        tools:targetApi="q">
 
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -21,7 +23,8 @@
 
         <service
             android:name=".RemoteService"
-            android:isolatedProcess="true" />
+            android:isolatedProcess="true"
+            android:useAppZygote="true" />
 
     </application>
 

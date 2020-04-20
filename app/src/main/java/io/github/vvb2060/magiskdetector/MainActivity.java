@@ -7,6 +7,8 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.util.Log;
 import android.view.View;
 
@@ -16,11 +18,10 @@ public class MainActivity extends Activity {
 
     private static final String TAG = "MagiskDetector";
     private ActivityMainBinding binding;
-    private IRemoteService service = null;
     private ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder binder) {
-            service = IRemoteService.Stub.asInterface(binder);
+            IRemoteService service = IRemoteService.Stub.asInterface(binder);
             try {
                 setCard1(service.haveSu());
             } catch (RemoteException e) {
@@ -30,7 +31,12 @@ public class MainActivity extends Activity {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            service = null;
+
+        }
+
+        @Override
+        public void onNullBinding(ComponentName name) {
+            setError();
         }
     };
 
@@ -46,9 +52,9 @@ public class MainActivity extends Activity {
         super.onStart();
         Intent intent = new Intent(getApplicationContext(), RemoteService.class);
         bindService(intent, connection, BIND_AUTO_CREATE);
-        setCard2(App.haveMagicMount());
-        setCard3(App.findMagiskdSocket());
-        setCard4(App.haveSu() == 0);
+        setCard2(Native.haveMagicMount());
+        setCard3(Native.findMagiskdSocket());
+        setCard4(Native.haveSu() == 0);
     }
 
     @Override
@@ -105,5 +111,12 @@ public class MainActivity extends Activity {
     private void setCard4(boolean havesu) {
         String text = havesu ? getString(R.string.test4_t) : getString(R.string.test4_f);
         binding.textView4.setText(getString(R.string.display, getString(R.string.test4), text));
+    }
+
+    private void setError() {
+        binding.textView.setText(R.string.error);
+        binding.cardView2.setVisibility(View.GONE);
+        binding.cardView3.setVisibility(View.GONE);
+        binding.cardView4.setVisibility(View.GONE);
     }
 }

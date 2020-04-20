@@ -22,4 +22,5 @@
     <string name="test4_f">Magisk Hide工作正常</string>
 
     <string name="display">%1$s\n\n检测结果：%2$s</string>
+    <string name="error">运行环境异常</string>
 </resources>
