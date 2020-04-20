@@ -130,7 +130,16 @@ jint su = -1;
 
 __attribute__((constructor))
 static void beforeLoad() {
-    su = access("/sbin/su", F_OK);
+    char *path = getenv("PATH");
+    char *p = strtok(path, ":");
+    char supath[PATH_MAX];
+    do {
+        sprintf(supath, "%s/su", p);
+        if (access(supath, F_OK) == 0) {
+            LOGW("Found su at %s", supath);
+            su = 0;
+        }
+    } while ((p = strtok(NULL, ":")) != NULL);
     scanMountinfo();
 }
 

@@ -1,9 +1,9 @@
 <resources>
     <string name="app_name">Magisk检测应用</string>
 
-    <string name="test1">检测是否存在/sbin/su</string>
-    <string name="test1_t">存在/sbin/su</string>
-    <string name="test1_f">不存在/sbin/su</string>
+    <string name="test1">检测PATH中是否存在su</string>
+    <string name="test1_t">PATH中存在su</string>
+    <string name="test1_f">PATH中不存在su</string>
 
     <string name="test2">检测是否有系统文件被Magisk模块修改</string>
     <string name="test2_0">未发现被Magisk模块修改的系统文件</string>

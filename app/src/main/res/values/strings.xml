@@ -1,9 +1,9 @@
 <resources>
     <string name="app_name">Magisk Detector</string>
 
-    <string name="test1">Check if /sbin/su file exists</string>
-    <string name="test1_t">Exists /sbin/su</string>
-    <string name="test1_f">/sbin/su does not exist</string>
+    <string name="test1">Check if su file exists in PATH</string>
+    <string name="test1_t">su file exists in PATH</string>
+    <string name="test1_f">su file does not exist in PATH</string>
 
     <string name="test2">Check if the system file is modified by Magisk module</string>
     <string name="test2_0">No system file modified by Magisk module</string>
