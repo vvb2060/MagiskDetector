@@ -11,8 +11,8 @@ zygote启动新进程时有一个`MountMode`参数，当它是`Zygote.MOUNT_EXTE
 
 检测Magisk模块
 -------------
-Magisk模块虽然能在文件系统上隐藏，但载入进程内存的还是修改版文件，检查进程的maps就能发现。内核会标记载入文件的原始位置，于是Magisk模块会导致某些路径在system分区或vendor分区的文件，实际位置是data分区。
+Magisk模块虽然能在文件系统上隐藏，但修改内容已经载入进程内存，检查进程的maps就能发现。maps显示的数据包含载入文件所在的设备。Magisk模块会导致某些文件的路径在system分区或vendor分区，但显示的设备位置却是data分区。
 
 检测MagiskSU
 ------------
-正常情况下，应用不能连接不是自己建立的socket，但Magisk修改了SELinux。所有应用都能连接magisk域的socket。每个Magisk的su进程都会建立一个socket，尝试连接所有socket，没有被SELinux拒绝的socket数量，就是su进程的数量。
+正常情况下，应用不能连接不是自己建立的socket，但Magisk修改了SELinux。所有应用都能连接magisk域的socket。每个Magisk的su进程都会建立一个socket，尝试连接所有socket，没有被SELinux拒绝的socket数量，就是su进程的数量。此检测方法可靠程度完全取决于SELinux规则的严格程度，Android版本太低或太高都会出问题。
