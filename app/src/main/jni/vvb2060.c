@@ -98,7 +98,7 @@ static inline void rstrip(char *line) {
     }
 }
 
-static inline jint scanNet() {
+static inline jint scanUnix() {
     FILE *fp = NULL;
     char line[PATH_MAX];
     char net[] = "/proc/net/unix";
@@ -115,6 +115,7 @@ static inline jint scanNet() {
         return -1;
     }
     int count = 0;
+    char last[PATH_MAX];
     while (fgets(line, PATH_MAX - 1, fp) != NULL) {
         if (strchr(line, '@') == NULL) continue;
         if (strchr(line, '.') != NULL || strchr(line, '-') != NULL) continue;
@@ -126,7 +127,9 @@ static inline jint scanNet() {
         if (connectMagiskd(name) == 0) {
             LOGW("%s connected", name);
             if (strcmp(name, "time_genoff") == 0) return -2;
-            else count++;
+            if (count >= 1 && strcmp(name, last) != 0) return -4;
+            strcpy(last, name);
+            count++;
         }
     }
     fclose(fp);
@@ -161,7 +164,7 @@ static jint haveMagicMount(JNIEnv *env __unused, jclass clazz __unused) {
 }
 
 static jint findMagiskdSocket(JNIEnv *env __unused, jclass clazz __unused) {
-    return scanNet();
+    return scanUnix();
 }
 
 static JNINativeMethod methods[] = {

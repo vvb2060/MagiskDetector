@@ -15,6 +15,7 @@
     <string name="test3_1">检测出现意外</string>
     <string name="test3_2">SELinux为宽容状态，系统已被严重修改</string>
     <string name="test3_3">此检测方式不支持Android10及以上系统</string>
+    <string name="test3_4">SELinux规则过于宽松，系统版本太低，请忽略此结果</string>
     <string name="test3_d">发现 %1$d 个正在运行的su进程</string>
 
     <string name="test4">检测Magisk Hide工作状态</string>
