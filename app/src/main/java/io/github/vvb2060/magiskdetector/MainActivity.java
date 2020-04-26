@@ -7,10 +7,14 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.system.ErrnoException;
-import android.system.Os;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import io.github.vvb2060.magiskdetector.databinding.ActivityMainBinding;
 
@@ -55,6 +59,43 @@ public class MainActivity extends Activity {
         setCard2(Native.haveMagicMount());
         setCard3(Native.findMagiskdSocket());
         setCard4(Native.haveSu() == 0);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.logcat) {
+            Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT)
+                    .addCategory(Intent.CATEGORY_OPENABLE)
+                    .setType("text/plain")
+                    .putExtra(Intent.EXTRA_TITLE, TAG);
+            startActivityForResult(intent, 42);
+            return true;
+        } else return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == 42 && data.getData() != null) {
+                try {
+                    OutputStream outputStream = getContentResolver().openOutputStream(data.getData());
+                    InputStream inputStream = Runtime.getRuntime().exec("/system/bin/logcat -d -v long").getInputStream();
+                    assert outputStream != null;
+                    byte[] buffer = new byte[8 * 1024];
+                    int bytes;
+                    while ((bytes = inputStream.read(buffer)) >= 0)
+                        outputStream.write(buffer, 0, bytes);
+                } catch (IOException e) {
+                    Log.e(TAG, "Unable to save log.", e);
+                }
+            }
+        } else super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override

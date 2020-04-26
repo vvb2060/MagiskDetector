@@ -24,4 +24,6 @@
 
     <string name="display">%1$s\n\nTest results: %2$s</string>
     <string name="error">App been hacked</string>
+
+    <string name="save_log">Save log</string>
 </resources>
