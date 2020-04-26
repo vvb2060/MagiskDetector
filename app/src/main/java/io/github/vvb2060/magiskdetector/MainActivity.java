@@ -143,9 +143,6 @@ public class MainActivity extends Activity {
             case -3:
                 text = getString(R.string.test3_3);
                 break;
-            case -4:
-                text = getString(R.string.test3_4);
-                break;
             default:
                 text = getString(R.string.test3_d, magiskdSocket);
         }

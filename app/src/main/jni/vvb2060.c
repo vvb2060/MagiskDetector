@@ -117,8 +117,12 @@ static inline jint scanUnix() {
     int count = 0;
     char last[PATH_MAX];
     while (fgets(line, PATH_MAX - 1, fp) != NULL) {
-        if (strchr(line, '@') == NULL) continue;
-        if (strchr(line, '.') != NULL || strchr(line, '-') != NULL) continue;
+        if (strchr(line, '@') == NULL ||
+            strchr(line, '.') != NULL ||
+            strchr(line, '-') != NULL ||
+            strchr(line, '_') != NULL) {
+            continue;
+        }
         char *name = line;
         while (*name != '@') name++;
         name++;
@@ -126,8 +130,7 @@ static inline jint scanUnix() {
         if (strchr(name, ':') != NULL) continue;
         if (connectMagiskd(name) == 0) {
             LOGW("%s connected", name);
-            if (strcmp(name, "time_genoff") == 0) return -2;
-            if (count >= 1 && strcmp(name, last) != 0) return -4;
+            if (count >= 1 && strcmp(name, last) != 0) return -2;
             strcpy(last, name);
             count++;
         }
