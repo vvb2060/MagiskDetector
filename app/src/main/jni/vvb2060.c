@@ -63,8 +63,8 @@ static inline jint scanMaps() {
             int s;
             char p[PATH_MAX];
             sscanf(line, "%*s %*s %*s %x:%x %*s %s", &f, &s, p);
-            if ((f == major && s == minor) || f == 7) {
-                LOGW("Magisk module file %x:%x(%x:%x) %s", f, s, major, minor, p);
+            if (f == major && s == minor) {
+                LOGW("Magisk module file %x:%x %s", f, s, p);
                 return 1;
             }
         }
