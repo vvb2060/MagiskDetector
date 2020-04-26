@@ -12,7 +12,7 @@ android {
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
-        ndkVersion "21.1.6273396"
+        ndkVersion "21.1.6363665"
     }
 
     buildTypes {
