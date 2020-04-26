@@ -53,13 +53,20 @@ static inline jint scanMaps() {
         close(fd);
         return -1;
     }
-    int f;
-    int s;
     while (fgets(line, PATH_MAX - 1, fp) != NULL) {
         if (strchr(line, '/') == NULL) continue;
-        if (strstr(line, "/system/") != NULL || strstr(line, "/vendor/") != NULL) {
-            sscanf(line, "%*s %*s %*s %x:%x", &f, &s);
-            if ((f == major && s == minor) || f == 7) return 1;
+        if (strstr(line, " /system/") != NULL ||
+            strstr(line, " /vendor/") != NULL ||
+            strstr(line, " /product/") != NULL ||
+            strstr(line, " /system_ext/") != NULL) {
+            int f;
+            int s;
+            char p[PATH_MAX];
+            sscanf(line, "%*s %*s %*s %x:%x %*s %s", &f, &s, p);
+            if ((f == major && s == minor) || f == 7) {
+                LOGW("Magisk module file %x:%x(%x:%x) %s", f, s, major, minor, p);
+                return 1;
+            }
         }
     }
     fclose(fp);
