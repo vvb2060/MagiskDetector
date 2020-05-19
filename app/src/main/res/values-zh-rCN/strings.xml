@@ -21,7 +21,19 @@
     <string name="test4_t">Magisk Hide未工作</string>
     <string name="test4_f">Magisk Hide工作正常</string>
 
-    <string name="display">%1$s\n\n检测结果：%2$s</string>
+    <string name="test5">检测SELinux政策是否被Magisk修改</string>
+    <string name="test5_01">检测出现意外</string>
+    <string name="test5_0">系统不支持此检测方式</string>
+    <string name="test5_1">未发现修改痕迹</string>
+    <string name="test5_2">SELinux政策已被修改</string>
+
+    <string name="test6">检测init.rc是否被Magisk修改</string>
+    <string name="test6_01">检测出现意外</string>
+    <string name="test6_0">未发现修改痕迹</string>
+    <string name="test6_1">init.rc已被Magisk修改</string>
+    <string name="test6_2">需要重启才能完成检测</string>
+
+    <string name="display">%1$s\n检测结果：%2$s</string>
     <string name="error">运行环境异常</string>
 
     <string name="save_log">保存日志</string>

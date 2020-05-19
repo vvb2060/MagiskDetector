@@ -21,7 +21,19 @@
     <string name="test4_t">Magisk Hide is not working</string>
     <string name="test4_f">Magisk Hide works fine</string>
 
-    <string name="display">%1$s\n\nTest results: %2$s</string>
+    <string name="test5">Check if SELinux policy is modified by Magisk</string>
+    <string name="test5_01">Unexpected</string>
+    <string name="test5_0">System does not support this detection method</string>
+    <string name="test5_1">No trace of modification found</string>
+    <string name="test5_2">SELinux policy has been modified</string>
+
+    <string name="test6">Check if init.rc is modified by Magisk</string>
+    <string name="test6_01">Unexpected</string>
+    <string name="test6_0">No trace of modification found</string>
+    <string name="test6_1">init.rc has been modified by Magisk</string>
+    <string name="test6_2">Need to restart to complete detection</string>
+
+    <string name="display">%1$s\nTest results: %2$s</string>
     <string name="error">App been hacked</string>
 
     <string name="save_log">Save log</string>

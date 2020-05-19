@@ -4,17 +4,26 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
+import android.util.ArraySet;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKeys;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.GeneralSecurityException;
+import java.util.Set;
 
 import io.github.vvb2060.magiskdetector.databinding.ActivityMainBinding;
 
@@ -22,7 +31,7 @@ public class MainActivity extends Activity {
 
     private static final String TAG = "MagiskDetector";
     private ActivityMainBinding binding;
-    private ServiceConnection connection = new ServiceConnection() {
+    private final ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder binder) {
             IRemoteService service = IRemoteService.Stub.asInterface(binder);
@@ -59,6 +68,8 @@ public class MainActivity extends Activity {
         setCard2(Native.haveMagicMount());
         setCard3(Native.findMagiskdSocket());
         setCard4(Native.haveSu() == 0);
+        setCard5(Native.testIoctl());
+        setCard6(props());
     }
 
     @Override
@@ -102,6 +113,41 @@ public class MainActivity extends Activity {
     protected void onStop() {
         super.onStop();
         unbindService(connection);
+    }
+
+    private int props() {
+        Native.getProps();
+        SharedPreferences sp;
+        try {
+            String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
+            sp = EncryptedSharedPreferences.create(
+                    getPackageName(),
+                    masterKeyAlias,
+                    this,
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            );
+        } catch (GeneralSecurityException | IOException e) {
+            Log.e(TAG, "Unable to open SharedPreferences.", e);
+            return -1;
+        }
+
+        String fingerprint = sp.getString("fingerprint", "");
+        long spTime = sp.getLong("time", 0);
+        long time = (System.currentTimeMillis() - SystemClock.elapsedRealtime()) / 10;
+
+        if (spTime != 0 && spTime != time && Build.FINGERPRINT.equals(fingerprint)) {
+            Set<String> props = sp.getStringSet("props", new ArraySet<>());
+            if (props.equals(Native.properties)) return 0;
+            else return 1;
+        } else {
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putString("fingerprint", Build.FINGERPRINT);
+            editor.putStringSet("props", Native.properties);
+            editor.putLong("time", time);
+            editor.apply();
+            return 2;
+        }
     }
 
     private void setCard1(boolean havesu) {
@@ -152,6 +198,46 @@ public class MainActivity extends Activity {
     private void setCard4(boolean havesu) {
         String text = havesu ? getString(R.string.test4_t) : getString(R.string.test4_f);
         binding.textView4.setText(getString(R.string.display, getString(R.string.test4), text));
+    }
+
+    private void setCard5(int testIoctl) {
+        String text;
+        switch (testIoctl) {
+            case -1:
+            default:
+                text = getString(R.string.test5_01);
+                break;
+            case 0:
+                text = getString(R.string.test5_0);
+                break;
+            case 1:
+                text = getString(R.string.test5_1);
+                break;
+            case 2:
+                text = getString(R.string.test5_2);
+                break;
+        }
+        binding.textView5.setText(getString(R.string.display, getString(R.string.test5), text));
+    }
+
+    private void setCard6(int props) {
+        String text;
+        switch (props) {
+            case -1:
+            default:
+                text = getString(R.string.test6_01);
+                break;
+            case 0:
+                text = getString(R.string.test6_0);
+                break;
+            case 1:
+                text = getString(R.string.test6_1);
+                break;
+            case 2:
+                text = getString(R.string.test6_2);
+                break;
+        }
+        binding.textView6.setText(getString(R.string.display, getString(R.string.test6), text));
     }
 
     private void setError() {

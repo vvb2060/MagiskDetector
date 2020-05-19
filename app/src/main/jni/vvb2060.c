@@ -1,7 +1,8 @@
+#include <jni.h>
 #include <string.h>
 #include <stdlib.h>
 #include <malloc.h>
-#include <jni.h>
+#include <termios.h>
 #include <sys/un.h>
 #include <sys/socket.h>
 #include <sys/system_properties.h>
@@ -14,7 +15,7 @@
 int major = -1;
 int minor = -1;
 
-static inline void scanMountinfo() {
+static inline void scan_mountinfo() {
     FILE *fp = NULL;
     char line[PATH_MAX];
     char mountinfo[] = "/proc/self/mountinfo";
@@ -38,7 +39,7 @@ static inline void scanMountinfo() {
     close(fd);
 }
 
-static inline jint scanMaps() {
+static inline int scan_maps() {
     FILE *fp = NULL;
     char line[PATH_MAX];
     char maps[] = "/proc/self/maps";
@@ -83,10 +84,10 @@ static inline socklen_t setup_sockaddr(struct sockaddr_un *sun, const char *name
     return ABS_SOCKET_LEN(sun);
 }
 
-static inline int connectMagiskd(const char *name) {
+static inline int connect_magiskd(const char *name) {
     struct sockaddr_un sun;
     socklen_t len = setup_sockaddr(&sun, name);
-    int fd = sys_socket(AF_LOCAL, (unsigned) SOCK_STREAM | (unsigned) SOCK_CLOEXEC, 0);
+    int fd = sys_socket(AF_LOCAL, SOCK_STREAM, 0);
     return connect(fd, (struct sockaddr *) &sun, len);
 }
 
@@ -98,7 +99,7 @@ static inline void rstrip(char *line) {
     }
 }
 
-static inline jint scanUnix() {
+static inline int scan_unix() {
     FILE *fp = NULL;
     char line[PATH_MAX];
     char net[] = "/proc/net/unix";
@@ -128,7 +129,7 @@ static inline jint scanUnix() {
         name++;
         rstrip(name);
         if (strchr(name, ':') != NULL) continue;
-        if (connectMagiskd(name) == 0) {
+        if (connect_magiskd(name) == 0) {
             LOGW("%s connected", name);
             if (count >= 1 && strcmp(name, last) != 0) return -2;
             strcpy(last, name);
@@ -140,10 +141,55 @@ static inline jint scanUnix() {
     return count;
 }
 
+static inline int pts_open(char *slave_name, size_t slave_name_size) {
+    int fd = sys_open("/dev/ptmx", O_RDWR, 0);
+    if (fd == -1) goto error;
+    if (ptsname_r(fd, slave_name, slave_name_size - 1)) goto error;
+    slave_name[slave_name_size - 1] = '\0';
+    if (grantpt(fd) == -1 || unlockpt(fd) == -1)goto error;
+    return fd;
+    error:
+    close(fd);
+    return -1;
+}
+
+static inline int test_ioctl() {
+    char pts_slave[PATH_MAX];
+    int fd = pts_open(pts_slave, sizeof(pts_slave));
+    if (fd == -1) return -1;
+
+    int re = -1;
+    int fdm = open(pts_slave, O_RDWR);
+    if (fdm != -1) {
+        re = ioctl(fdm, TIOCSTI, "vvb2060") == -1 ? errno : 0;
+        close(fdm);
+    }
+    close(fd);
+    LOGI("ioctl errno is %d", re);
+    return re;
+}
+
+JNIEnv *env0;
+jclass clazz0;
+
+void callback(const prop_info *info, void *cookie __unused) {
+    char name[PROP_NAME_MAX];
+    char value[91];
+    jmethodID add = (*env0)->GetStaticMethodID(env0, clazz0, "add", "(Ljava/lang/String;)V");
+
+    __system_property_read(info, name, value);
+    if (strncmp(name, "init.svc.", strlen("init.svc.")) == 0) {
+        if (strcmp(value, "stopped") != 0 && strcmp(value, "running") != 0) return;
+        LOGI("svc name %s", name);
+        jstring jname = (*env0)->NewStringUTF(env0, name);
+        (*env0)->CallStaticVoidMethod(env0, clazz0, add, jname);
+    }
+}
+
 jint su = -1;
 
 __attribute__((constructor))
-static void beforeLoad() {
+static void before_load() {
     char *path = getenv("PATH");
     char *p = strtok(path, ":");
     char supath[PATH_MAX];
@@ -154,7 +200,7 @@ static void beforeLoad() {
             su = 0;
         }
     } while ((p = strtok(NULL, ":")) != NULL);
-    scanMountinfo();
+    scan_mountinfo();
 }
 
 static jint haveSu(JNIEnv *env __unused, jclass clazz __unused) {
@@ -163,17 +209,39 @@ static jint haveSu(JNIEnv *env __unused, jclass clazz __unused) {
 
 static jint haveMagicMount(JNIEnv *env __unused, jclass clazz __unused) {
     if (minor == -1 || major == -1) return -1;
-    return scanMaps();
+    return scan_maps();
 }
 
 static jint findMagiskdSocket(JNIEnv *env __unused, jclass clazz __unused) {
-    return scanUnix();
+    return scan_unix();
+}
+
+static jint testIoctl(JNIEnv *env __unused, jclass clazz __unused) {
+    int re = test_ioctl();
+    if (re > 0) {
+        if (re == EACCES) return 1;
+        else if (android_get_device_api_level() >= __ANDROID_API_O__) return 2;
+        else return 0;
+    }
+    return re;
+}
+
+static void getProps(JNIEnv *env, jclass clazz) {
+    env0 = env;
+    clazz0 = clazz;
+    jmethodID clear = (*env)->GetStaticMethodID(env, clazz, "clear", "()V");
+    (*env)->CallStaticVoidMethod(env, clazz, clear);
+    __system_property_foreach(&callback, NULL);
+    env0 = NULL;
+    clazz0 = NULL;
 }
 
 static JNINativeMethod methods[] = {
         {"haveSu",            "()I", haveSu},
         {"haveMagicMount",    "()I", haveMagicMount},
         {"findMagiskdSocket", "()I", findMagiskdSocket},
+        {"testIoctl",         "()I", testIoctl},
+        {"getProps",          "()V", getProps},
 };
 
 jint JNI_OnLoad(JavaVM *jvm, void *v __unused) {
@@ -188,7 +256,7 @@ jint JNI_OnLoad(JavaVM *jvm, void *v __unused) {
         return JNI_ERR;
     }
 
-    if ((*env)->RegisterNatives(env, clazz, methods, 3) < 0) {
+    if ((*env)->RegisterNatives(env, clazz, methods, 5) < 0) {
         return JNI_ERR;
     }
 
