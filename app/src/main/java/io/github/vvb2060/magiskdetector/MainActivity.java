@@ -19,9 +19,14 @@ import android.view.View;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKeys;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Set;
 
@@ -132,22 +137,39 @@ public class MainActivity extends Activity {
             return -1;
         }
 
-        String fingerprint = sp.getString("fingerprint", "");
-        long spTime = sp.getLong("time", 0);
-        long time = (System.currentTimeMillis() - SystemClock.elapsedRealtime()) / 10;
-
-        if (spTime != 0 && spTime != time && Build.FINGERPRINT.equals(fingerprint)) {
-            Set<String> props = sp.getStringSet("props", new ArraySet<>());
-            if (props.equals(Native.properties)) return 0;
-            else return 1;
+        String spFingerprint = sp.getString("fingerprint", "");
+        String fingerprint = Build.FINGERPRINT;
+        Log.i(TAG, "spFingerprint=" + spFingerprint + " \n  fingerprint=" + fingerprint);
+        String spBootId = sp.getString("boot_id", "");
+        String bootId = getBootId();
+        Log.i(TAG, "spBootId=" + spBootId + " \n  bootId=" + bootId);
+        if (spFingerprint.equals(fingerprint) && spBootId.length() > 0) {
+            if (!spBootId.equals(bootId)) {
+                Set<String> props = sp.getStringSet("props", new ArraySet<>());
+                return props.equals(Native.properties) ? 0 : 1;
+            } else return 2;
         } else {
             SharedPreferences.Editor editor = sp.edit();
-            editor.putString("fingerprint", Build.FINGERPRINT);
+            editor.putString("fingerprint", fingerprint);
+            editor.putString("boot_id", bootId);
             editor.putStringSet("props", Native.properties);
-            editor.putLong("time", time);
             editor.apply();
             return 2;
         }
+    }
+
+    private String getBootId() {
+        String bootId = "";
+        try (InputStream is = new FileInputStream("/proc/sys/kernel/random/boot_id")) {
+            Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
+            bootId = new BufferedReader(reader).readLine().trim();
+        } catch (IOException e) {
+            Log.w(TAG, "Can't read boot_id.", e);
+        }
+        if (bootId.length() == 0) {
+            bootId = String.valueOf((System.currentTimeMillis() - SystemClock.elapsedRealtime()) / 10);
+        }
+        return bootId;
     }
 
     private void setCard1(boolean havesu) {
