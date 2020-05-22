@@ -159,9 +159,9 @@ static inline int test_ioctl() {
     if (fd == -1) return -1;
 
     int re = -1;
-    int fdm = open(pts_slave, O_RDWR);
+    int fdm = sys_open(pts_slave, O_RDWR, 0);
     if (fdm != -1) {
-        re = ioctl(fdm, TIOCSTI, "vvb2060") == -1 ? errno : 0;
+        re = sys_ioctl(fdm, TIOCSTI, "vvb2060") == -1 ? errno : 0;
         close(fdm);
     }
     close(fd);
