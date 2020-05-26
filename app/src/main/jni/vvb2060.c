@@ -84,13 +84,6 @@ static inline socklen_t setup_sockaddr(struct sockaddr_un *sun, const char *name
     return ABS_SOCKET_LEN(sun);
 }
 
-static inline int connect_magiskd(const char *name) {
-    struct sockaddr_un sun;
-    socklen_t len = setup_sockaddr(&sun, name);
-    int fd = sys_socket(AF_LOCAL, SOCK_STREAM, 0);
-    return connect(fd, (struct sockaddr *) &sun, len);
-}
-
 static inline void rstrip(char *line) {
     char *path = line;
     if (line != NULL) {
@@ -117,6 +110,7 @@ static inline int scan_unix() {
     }
     int count = 0;
     char last[PATH_MAX];
+    struct sockaddr_un sun;
     while (fgets(line, PATH_MAX - 1, fp) != NULL) {
         if (strchr(line, '@') == NULL ||
             strchr(line, '.') != NULL ||
@@ -129,7 +123,10 @@ static inline int scan_unix() {
         name++;
         rstrip(name);
         if (strchr(name, ':') != NULL) continue;
-        if (connect_magiskd(name) == 0) {
+        socklen_t len = setup_sockaddr(&sun, name);
+        int fds = sys_socket(AF_LOCAL, SOCK_STREAM, 0);
+        if (connect(fds, (struct sockaddr *) &sun, len) == 0) {
+            close(fds);
             LOGW("%s connected", name);
             if (count >= 1 && strcmp(name, last) != 0) return -2;
             strcpy(last, name);
@@ -146,7 +143,7 @@ static inline int pts_open(char *slave_name, size_t slave_name_size) {
     if (fd == -1) goto error;
     if (ptsname_r(fd, slave_name, slave_name_size - 1)) goto error;
     slave_name[slave_name_size - 1] = '\0';
-    if (grantpt(fd) == -1 || unlockpt(fd) == -1)goto error;
+    if (grantpt(fd) == -1 || unlockpt(fd) == -1) goto error;
     return fd;
     error:
     close(fd);
