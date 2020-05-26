@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Magisk檢查程式</string>
+    <string name="app_name">Magisk 檢查器</string>
 
     <string name="test1">檢查 PATH 中是否存在 su</string>
     <string name="test1_t">PATH 中存在 su</string>
