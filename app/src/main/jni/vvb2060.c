@@ -123,6 +123,7 @@ static inline int scan_unix() {
         name++;
         rstrip(name);
         if (strchr(name, ':') != NULL) continue;
+        if (strlen(name) > 32) continue;
         socklen_t len = setup_sockaddr(&sun, name);
         int fds = sys_socket(AF_LOCAL, SOCK_STREAM, 0);
         if (connect(fds, (struct sockaddr *) &sun, len) == 0) {
