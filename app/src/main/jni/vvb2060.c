@@ -186,7 +186,7 @@ void callback(const prop_info *info, void *cookie __unused) {
 
 jint su = -1;
 
-__attribute__((constructor))
+__attribute__((__constructor__, __used__))
 static void before_load() {
     char *path = getenv("PATH");
     char *p = strtok(path, ":");

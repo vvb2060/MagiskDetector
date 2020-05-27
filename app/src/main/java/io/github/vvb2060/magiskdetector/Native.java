@@ -5,7 +5,7 @@ import android.util.ArraySet;
 import java.util.Set;
 
 public class Native {
-    static Set<String> properties = new ArraySet<>();
+    static final Set<String> properties = new ArraySet<>();
 
     static {
         System.loadLibrary("vvb2060");
