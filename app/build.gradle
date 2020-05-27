@@ -10,8 +10,8 @@ android {
         applicationId "io.github.vvb2060.magiskdetector"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 3
-        versionName "2.0"
+        versionCode 4
+        versionName "2.1"
         ndkVersion "21.1.6363665"
     }
 
