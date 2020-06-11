@@ -3,16 +3,15 @@ plugins {
 }
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.3"
-
+    compileSdkVersion 30
+    buildToolsVersion '30.0.0'
+    ndkVersion '21.3.6528147'
     defaultConfig {
-        applicationId "io.github.vvb2060.magiskdetector"
+        applicationId 'io.github.vvb2060.magiskdetector'
         minSdkVersion 23
-        targetSdkVersion 29
+        targetSdkVersion 30
         versionCode 4
-        versionName "2.1"
-        ndkVersion "21.1.6363665"
+        versionName '2.1'
     }
 
     buildTypes {
