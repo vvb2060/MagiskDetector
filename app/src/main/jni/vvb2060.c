@@ -167,20 +167,35 @@ static inline int test_ioctl() {
     return re;
 }
 
-JNIEnv *env0;
-jclass clazz0;
+void __system_property_read_callback(const prop_info *__pi,
+                                     void (*__callback)(void *__cookie, const char *__name,
+                                                        const char *__value, uint32_t __serial),
+                                     void *__cookie) __attribute__((weak));
 
-void callback(const prop_info *info, void *cookie __unused) {
-    char name[PROP_NAME_MAX];
-    char value[91];
-    jmethodID add = (*env0)->GetStaticMethodID(env0, clazz0, "add", "(Ljava/lang/String;)V");
-
-    __system_property_read(info, name, value);
+static void java_add(JNIEnv *env, const char *name, const char *value) {
+    jclass clazz = (*env)->FindClass(env, "io/github/vvb2060/magiskdetector/Native");
+    jmethodID add = (*env)->GetStaticMethodID(env, clazz, "add", "(Ljava/lang/String;)V");
     if (strncmp(name, "init.svc.", strlen("init.svc.")) == 0) {
         if (strcmp(value, "stopped") != 0 && strcmp(value, "running") != 0) return;
         LOGI("svc name %s", name);
-        jstring jname = (*env0)->NewStringUTF(env0, name);
-        (*env0)->CallStaticVoidMethod(env0, clazz0, add, jname);
+        jstring jname = (*env)->NewStringUTF(env, name);
+        (*env)->CallStaticVoidMethod(env, clazz, add, jname);
+    }
+}
+
+static void read_callback(void *cookie, const char *name, const char *value,
+                          uint32_t serial __unused) {
+    java_add(cookie, name, value);
+}
+
+static void callback(const prop_info *info, void *cookie) {
+    if (&__system_property_read_callback) {
+        __system_property_read_callback(info, &read_callback, cookie);
+    } else {
+        char name[PROP_NAME_MAX];
+        char value[91];
+        __system_property_read(info, name, value);
+        java_add(cookie, name, value);
     }
 }
 
@@ -225,13 +240,9 @@ static jint testIoctl(JNIEnv *env __unused, jclass clazz __unused) {
 }
 
 static void getProps(JNIEnv *env, jclass clazz) {
-    env0 = env;
-    clazz0 = clazz;
     jmethodID clear = (*env)->GetStaticMethodID(env, clazz, "clear", "()V");
     (*env)->CallStaticVoidMethod(env, clazz, clear);
-    __system_property_foreach(&callback, NULL);
-    env0 = NULL;
-    clazz0 = NULL;
+    __system_property_foreach(&callback, env);
 }
 
 static JNINativeMethod methods[] = {
