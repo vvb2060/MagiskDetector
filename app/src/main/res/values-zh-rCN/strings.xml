@@ -34,7 +34,7 @@
     <string name="test6_2">需要重启才能完成检测</string>
 
     <string name="display">%1$s\n检测结果：%2$s</string>
-    <string name="error">运行环境异常</string>
+    <string name="error">运行环境异常，系统被Root或app被修改</string>
 
     <string name="save_log">保存日志</string>
 </resources>

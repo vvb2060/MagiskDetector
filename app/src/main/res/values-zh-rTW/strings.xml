@@ -34,7 +34,7 @@
     <string name="test6_2">需要重啟才能完成檢查</string>
 
     <string name="display">%1$s\n檢查结果：%2$s</string>
-    <string name="error">執行環境異常</string>
+    <string name="error">執行環境異常，系統被Root或應用程式被修改</string>
 
     <string name="save_log">儲存日誌</string>
 </resources>

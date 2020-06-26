@@ -49,7 +49,7 @@ public class MainActivity extends Activity {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-
+            binding.textView.setText(R.string.error);
         }
 
         @Override
@@ -69,7 +69,7 @@ public class MainActivity extends Activity {
     protected void onStart() {
         super.onStart();
         Intent intent = new Intent(getApplicationContext(), RemoteService.class);
-        bindService(intent, connection, BIND_AUTO_CREATE);
+        if (!bindService(intent, connection, BIND_AUTO_CREATE)) setError();
         setCard2(Native.haveMagicMount());
         setCard3(Native.findMagiskdSocket());
         setCard4(Native.haveSu() == 0);
@@ -177,7 +177,10 @@ public class MainActivity extends Activity {
         if (havesu) {
             text = getString(R.string.test1_t);
             binding.cardView4.setVisibility(View.VISIBLE);
-        } else text = getString(R.string.test1_f);
+        } else {
+            text = getString(R.string.test1_f);
+            binding.cardView4.setVisibility(View.GONE);
+        }
         binding.textView.setText(getString(R.string.display, getString(R.string.test1), text));
     }
 
