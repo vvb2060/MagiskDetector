@@ -1,8 +1,6 @@
 #include <jni.h>
-#include <string.h>
 #include <stdlib.h>
-#include <malloc.h>
-#include <termios.h>
+#include <pty.h>
 #include <sys/un.h>
 #include <sys/socket.h>
 #include <sys/system_properties.h>
@@ -12,8 +10,15 @@
 
 #define TAG "MagiskDetector"
 
-int major = -1;
-int minor = -1;
+static int major = -1;
+static int minor = -1;
+
+static inline void sscanfx(const char *restrict s, const char *restrict fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    vsscanf(s, fmt, ap);
+    va_end(ap);
+}
 
 static inline void scan_mountinfo() {
     FILE *fp = NULL;
@@ -32,7 +37,7 @@ static inline void scan_mountinfo() {
     }
     while (fgets(line, PATH_MAX - 1, fp) != NULL) {
         if (strstr(line, "/ /data ") != NULL) {
-            sscanf(line, "%*d %*d %d:%d", &major, &minor);
+            sscanfx(line, "%*d %*d %d:%d", &major, &minor);
         }
     }
     fclose(fp);
@@ -63,7 +68,7 @@ static inline int scan_maps() {
             int f;
             int s;
             char p[PATH_MAX];
-            sscanf(line, "%*s %*s %*s %x:%x %*s %s", &f, &s, p);
+            sscanfx(line, "%*s %*s %*s %x:%x %*s %s", &f, &s, p);
             if (f == major && s == minor) {
                 LOGW("Magisk module file %x:%x %s", f, s, p);
                 return 1;
@@ -167,10 +172,11 @@ static inline int test_ioctl() {
     return re;
 }
 
-void __system_property_read_callback(const prop_info *__pi,
-                                     void (*__callback)(void *__cookie, const char *__name,
-                                                        const char *__value, uint32_t __serial),
-                                     void *__cookie) __attribute__((weak));
+// NOLINTNEXTLINE
+void __system_property_read_callback(const prop_info *pi,
+                                     void (*callback)(void *cookie, const char *name,
+                                                      const char *value, uint32_t serial),
+                                     void *cookie) __attribute__((weak));
 
 static void java_add(JNIEnv *env, const char *name, const char *value) {
     jclass clazz = (*env)->FindClass(env, "io/github/vvb2060/magiskdetector/Native");
@@ -193,13 +199,13 @@ static void callback(const prop_info *info, void *cookie) {
         __system_property_read_callback(info, &read_callback, cookie);
     } else {
         char name[PROP_NAME_MAX];
-        char value[91];
+        char value[PROP_VALUE_MAX];
         __system_property_read(info, name, value);
         java_add(cookie, name, value);
     }
 }
 
-jint su = -1;
+static jint su = -1;
 
 __attribute__((__constructor__, __used__))
 static void before_load() {

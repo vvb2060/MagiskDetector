@@ -954,6 +954,9 @@ struct kernel_statfs {
 #ifndef __NR_fallocate
 #define __NR_fallocate          324
 #endif
+#ifndef __NR_getrandom
+#define __NR_getrandom          355
+#endif
 /* End of i386 definitions                                                   */
 #elif defined(__ARM_ARCH_3__) || defined(__ARM_EABI__)
 #ifndef __NR_setresuid
@@ -1058,6 +1061,9 @@ struct kernel_statfs {
 #ifndef __NR_getcpu
 #define __NR_getcpu             (__NR_SYSCALL_BASE + 345)
 #endif
+#ifndef __NR_getrandom
+#define __NR_getrandom          (__NR_SYSCALL_BASE + 384)
+#endif
 /* End of ARM 3/EABI definitions                                             */
 #elif defined(__aarch64__)
 #ifndef __NR_setxattr
@@ -1155,6 +1161,9 @@ struct kernel_statfs {
 #ifndef __NR_move_pages
 #define __NR_move_pages         239
 #endif
+#ifndef __NR_getrandom
+#define __NR_getrandom          278
+#endif
 /* End of aarch64 definitions                                                */
 #elif defined(__x86_64__)
 #ifndef __NR_pread64
@@ -1245,6 +1254,9 @@ struct kernel_statfs {
 #endif
 #ifndef __NR_fallocate
 #define __NR_fallocate          285
+#endif
+#ifndef __NR_getrandom
+#define __NR_getrandom          318
 #endif
 /* End of x86-64 definitions                                                 */
 #elif defined(__mips__)
@@ -1347,6 +1359,9 @@ struct kernel_statfs {
 #ifndef __NR_ioprio_get
 #define __NR_ioprio_get         (__NR_Linux + 315)
 #endif
+#ifndef __NR_getrandom
+#define __NR_getrandom          (__NR_Linux + 353)
+#endif
 /* End of MIPS (old 32bit API) definitions */
 #elif  _MIPS_SIM == _MIPS_SIM_ABI64
 #ifndef __NR_pread64
@@ -1424,6 +1439,9 @@ struct kernel_statfs {
 #endif
 #ifndef __NR_ioprio_get
 #define __NR_ioprio_get         (__NR_Linux + 274)
+#endif
+#ifndef __NT_getrandom
+#define                         (__NR_Linux + 313)
 #endif
 /* End of MIPS (64bit API) definitions */
 #else
@@ -1962,7 +1980,7 @@ struct kernel_statfs {
                            LSS_ENTRYPOINT                                     \
                            "pop %%ebx"                                        \
                            args                                               \
-                           : "esp", "memory");                                \
+                           : "memory");                                       \
       LSS_RETURN(type,__res)
     #undef  _syscall0
     #define _syscall0(type,name)                                              \
@@ -2019,7 +2037,7 @@ struct kernel_statfs {
                              : "i" (__NR_##name), "ri" ((long)(arg1)),        \
                                "c" ((long)(arg2)), "d" ((long)(arg3)),        \
                                "S" ((long)(arg4)), "D" ((long)(arg5))         \
-                             : "esp", "memory");                              \
+                             : "memory");                                     \
         LSS_RETURN(type,__res);                                               \
       }
     #undef  _syscall6
@@ -2041,7 +2059,7 @@ struct kernel_statfs {
                              : "i" (__NR_##name),  "0" ((long)(&__s)),        \
                                "c" ((long)(arg2)), "d" ((long)(arg3)),        \
                                "S" ((long)(arg4)), "D" ((long)(arg5))         \
-                             : "esp", "memory");                              \
+                             : "memory");                                     \
         LSS_RETURN(type,__res);                                               \
       }
     LSS_INLINE int LSS_NAME(clone)(int (*fn)(void *), void *child_stack,
@@ -2127,7 +2145,7 @@ struct kernel_statfs {
                            : "0"(-EINVAL), "i"(__NR_clone),
                              "m"(fn), "m"(child_stack), "m"(flags), "m"(arg),
                              "m"(parent_tidptr), "m"(newtls), "m"(child_tidptr)
-                           : "esp", "memory", "ecx", "edx", "esi", "edi");
+                           : "memory", "ecx", "edx", "esi", "edi");
       LSS_RETURN(int, __res);
     }
 
@@ -3657,6 +3675,10 @@ struct kernel_statfs {
     LSS_INLINE _syscall4(int, fallocate,
                          int, f, int, mode, loff_t, offset, loff_t, len)
     #endif
+  #endif
+  #if defined(__NR_getrandom)
+    LSS_INLINE _syscall3(ssize_t, getrandom, void*, buffer, size_t, length,
+                         unsigned int, flags)
   #endif
   #if defined(__NR_newfstatat)
     LSS_INLINE _syscall4(int, newfstatat,         int,   d,

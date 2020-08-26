@@ -17,7 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import androidx.security.crypto.EncryptedSharedPreferences;
-import androidx.security.crypto.MasterKeys;
+import androidx.security.crypto.MasterKey;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -124,11 +124,13 @@ public class MainActivity extends Activity {
         Native.getProps();
         SharedPreferences sp;
         try {
-            String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
+            MasterKey masterKey = new MasterKey.Builder(this)
+                    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                    .build();
             sp = EncryptedSharedPreferences.create(
-                    getPackageName(),
-                    masterKeyAlias,
                     this,
+                    getPackageName(),
+                    masterKey,
                     EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                     EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             );
