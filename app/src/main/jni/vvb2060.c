@@ -7,6 +7,7 @@
 
 #include "logging.h"
 #include "linux_syscall_support.h"
+#include "xposed-detector.h"
 
 #define TAG "MagiskDetector"
 
@@ -251,14 +252,6 @@ static void getProps(JNIEnv *env, jclass clazz) {
     __system_property_foreach(&callback, env);
 }
 
-static JNINativeMethod methods[] = {
-        {"haveSu",            "()I", haveSu},
-        {"haveMagicMount",    "()I", haveMagicMount},
-        {"findMagiskdSocket", "()I", findMagiskdSocket},
-        {"testIoctl",         "()I", testIoctl},
-        {"getProps",          "()V", getProps},
-};
-
 jint JNI_OnLoad(JavaVM *jvm, void *v __unused) {
     JNIEnv *env;
     jclass clazz;
@@ -267,9 +260,19 @@ jint JNI_OnLoad(JavaVM *jvm, void *v __unused) {
         return JNI_ERR;
     }
 
+    get_xposed_status(env, android_get_device_api_level());
+
     if ((clazz = (*env)->FindClass(env, "io/github/vvb2060/magiskdetector/Native")) == NULL) {
         return JNI_ERR;
     }
+
+    JNINativeMethod methods[] = {
+            {"haveSu",            "()I", haveSu},
+            {"haveMagicMount",    "()I", haveMagicMount},
+            {"findMagiskdSocket", "()I", findMagiskdSocket},
+            {"testIoctl",         "()I", testIoctl},
+            {"getProps",          "()V", getProps},
+    };
 
     if ((*env)->RegisterNatives(env, clazz, methods, 5) < 0) {
         return JNI_ERR;
