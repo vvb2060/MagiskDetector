@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.util.ArraySet;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,7 +27,6 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
-import java.util.Set;
 
 import io.github.vvb2060.magiskdetector.databinding.ActivityMainBinding;
 
@@ -121,7 +119,6 @@ public class MainActivity extends Activity {
     }
 
     private int props() {
-        Native.getProps();
         SharedPreferences sp;
         try {
             MasterKey masterKey = new MasterKey.Builder(this)
@@ -145,16 +142,16 @@ public class MainActivity extends Activity {
         String spBootId = sp.getString("boot_id", "");
         String bootId = getBootId();
         Log.i(TAG, "spBootId=" + spBootId + " \n  bootId=" + bootId);
-        if (spFingerprint.equals(fingerprint) && spBootId.length() > 0) {
+        String spPropsHash = sp.getString("props_hash", "");
+        if (spFingerprint.equals(fingerprint) && spBootId.length() > 0 && spPropsHash.length() > 0) {
             if (!spBootId.equals(bootId)) {
-                Set<String> props = sp.getStringSet("props", new ArraySet<>());
-                return props.equals(Native.properties) ? 0 : 1;
+                return spPropsHash.equals(Native.getPropsHash()) ? 0 : 1;
             } else return 2;
         } else {
             SharedPreferences.Editor editor = sp.edit();
             editor.putString("fingerprint", fingerprint);
             editor.putString("boot_id", bootId);
-            editor.putStringSet("props", Native.properties);
+            editor.putString("props_hash", Native.getPropsHash());
             editor.apply();
             return 2;
         }

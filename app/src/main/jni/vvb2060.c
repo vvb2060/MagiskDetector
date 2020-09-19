@@ -8,6 +8,7 @@
 #include "logging.h"
 #include "linux_syscall_support.h"
 #include "xposed-detector.h"
+#include "openssl/sha.h"
 
 #define TAG "MagiskDetector"
 
@@ -179,20 +180,24 @@ void __system_property_read_callback(const prop_info *pi,
                                                       const char *value, uint32_t serial),
                                      void *cookie) __attribute__((weak));
 
-static void java_add(JNIEnv *env, const char *name, const char *value) {
-    jclass clazz = (*env)->FindClass(env, "io/github/vvb2060/magiskdetector/Native");
-    jmethodID add = (*env)->GetStaticMethodID(env, clazz, "add", "(Ljava/lang/String;)V");
+static void hash(uint8_t buffer[SHA512_DIGEST_LENGTH], const char *name, const char *value) {
     if (strncmp(name, "init.svc.", strlen("init.svc.")) == 0) {
         if (strcmp(value, "stopped") != 0 && strcmp(value, "running") != 0) return;
         LOGI("svc name %s", name);
-        jstring jname = (*env)->NewStringUTF(env, name);
-        (*env)->CallStaticVoidMethod(env, clazz, add, jname);
+        uint8_t out[SHA512_DIGEST_LENGTH];
+        SHA512_CTX ctx;
+        SHA512_Init(&ctx);
+        SHA512_Update(&ctx, name, strlen(name));
+        SHA512_Final(out, &ctx);
+        for (int i = 0; i < SHA512_DIGEST_LENGTH; i++) {
+            buffer[i] ^= out[i];
+        }
     }
 }
 
 static void read_callback(void *cookie, const char *name, const char *value,
                           uint32_t serial __unused) {
-    java_add(cookie, name, value);
+    hash(cookie, name, value);
 }
 
 static void callback(const prop_info *info, void *cookie) {
@@ -202,7 +207,7 @@ static void callback(const prop_info *info, void *cookie) {
         char name[PROP_NAME_MAX];
         char value[PROP_VALUE_MAX];
         __system_property_read(info, name, value);
-        java_add(cookie, name, value);
+        hash(cookie, name, value);
     }
 }
 
@@ -246,10 +251,15 @@ static jint testIoctl(JNIEnv *env __unused, jclass clazz __unused) {
     return re;
 }
 
-static void getProps(JNIEnv *env, jclass clazz) {
-    jmethodID clear = (*env)->GetStaticMethodID(env, clazz, "clear", "()V");
-    (*env)->CallStaticVoidMethod(env, clazz, clear);
-    __system_property_foreach(&callback, env);
+static jstring getPropsHash(JNIEnv *env, jclass clazz __unused) {
+    uint8_t hash[SHA512_DIGEST_LENGTH] = {0};
+    __system_property_foreach(&callback, &hash);
+    char string[SHA512_CBLOCK + 1];
+    for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
+        sprintf(string + (i * 2), "%02hhx", hash[i]);
+    }
+    string[SHA512_CBLOCK] = 0;
+    return (*env)->NewStringUTF(env, string);
 }
 
 jint JNI_OnLoad(JavaVM *jvm, void *v __unused) {
@@ -267,11 +277,11 @@ jint JNI_OnLoad(JavaVM *jvm, void *v __unused) {
     }
 
     JNINativeMethod methods[] = {
-            {"haveSu",            "()I", haveSu},
-            {"haveMagicMount",    "()I", haveMagicMount},
-            {"findMagiskdSocket", "()I", findMagiskdSocket},
-            {"testIoctl",         "()I", testIoctl},
-            {"getProps",          "()V", getProps},
+            {"haveSu",            "()I",                  haveSu},
+            {"haveMagicMount",    "()I",                  haveMagicMount},
+            {"findMagiskdSocket", "()I",                  findMagiskdSocket},
+            {"testIoctl",         "()I",                  testIoctl},
+            {"getPropsHash",      "()Ljava/lang/String;", getPropsHash},
     };
 
     if ((*env)->RegisterNatives(env, clazz, methods, 5) < 0) {
