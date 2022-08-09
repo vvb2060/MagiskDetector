@@ -2,39 +2,20 @@
     <string name="app_name">Magisk检测应用</string>
 
     <string name="test1">检测PATH中是否存在su</string>
-    <string name="test1_t">PATH中存在su</string>
-    <string name="test1_f">PATH中不存在su</string>
+    <string name="test1_1">PATH中存在su</string>
+    <string name="test1_0">PATH中不存在su</string>
 
     <string name="test2">检测是否有系统文件被Magisk模块修改</string>
     <string name="test2_0">未发现被Magisk模块修改的系统文件</string>
-    <string name="test2_1">至少一个系统文件被Magisk模块修改</string>
-    <string name="test2_d">检测出现意外</string>
+    <string name="test2_1">%1$d 个系统文件被Magisk模块修改</string>
 
-    <string name="test3">检测Magisk的su进程数量</string>
-    <string name="test3_0">未发现正在运行的su进程</string>
-    <string name="test3_1">检测出现意外</string>
-    <string name="test3_2">SELinux错误，请忽略此检测结果</string>
-    <string name="test3_3">此检测方式不支持Android10及以上系统</string>
-    <string name="test3_d">发现 %1$d 个正在运行的su进程</string>
-
-    <string name="test4">检测Magisk Hide工作状态</string>
-    <string name="test4_t">Magisk Hide未工作</string>
-    <string name="test4_f">Magisk Hide工作正常</string>
-
-    <string name="test5">检测SELinux政策是否被Magisk修改</string>
-    <string name="test5_01">检测出现意外</string>
-    <string name="test5_0">系统不支持此检测方式</string>
-    <string name="test5_1">未发现修改痕迹</string>
-    <string name="test5_2">SELinux政策已被修改</string>
-
-    <string name="test6">检测init.rc是否被Magisk修改</string>
-    <string name="test6_01">检测出现意外</string>
-    <string name="test6_0">未发现修改痕迹</string>
-    <string name="test6_1">init.rc已被Magisk修改</string>
-    <string name="test6_2">需要重启才能完成检测</string>
+    <string name="test3">检测Magisk Hide</string>
+    <string name="test3_1">Magisk Hide已启用，pid %1$d</string>
+    <string name="test3_0">未找到Magisk Hide</string>
 
     <string name="display">%1$s\n检测结果：%2$s</string>
     <string name="error">运行环境异常，系统被Root或app被修改</string>
+    <string name="test_e">检测出现意外</string>
 
     <string name="save_log">保存日志</string>
 </resources>

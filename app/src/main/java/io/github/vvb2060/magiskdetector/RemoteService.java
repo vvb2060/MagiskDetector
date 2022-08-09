@@ -6,10 +6,24 @@ import android.os.IBinder;
 import android.system.Os;
 
 public class RemoteService extends Service {
+    static {
+        System.loadLibrary("vvb2060");
+    }
+
     private final IRemoteService.Stub mBinder = new IRemoteService.Stub() {
         @Override
-        public boolean haveSu() {
-            return Native.haveSu() == 0;
+        public int haveSu() {
+            return RemoteService.haveSu();
+        }
+
+        @Override
+        public int haveMagiskHide() {
+            return RemoteService.haveMagiskHide();
+        }
+
+        @Override
+        public int haveMagicMount() {
+            return RemoteService.haveMagicMount();
         }
     };
 
@@ -20,4 +34,9 @@ public class RemoteService extends Service {
         else return null;
     }
 
+    static native int haveSu();
+
+    static native int haveMagiskHide();
+
+    static native int haveMagicMount();
 }

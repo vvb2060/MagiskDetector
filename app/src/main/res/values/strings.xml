@@ -2,39 +2,20 @@
     <string name="app_name">Magisk Detector</string>
 
     <string name="test1">Check if su file exists in PATH</string>
-    <string name="test1_t">su file exists in PATH</string>
-    <string name="test1_f">su file does not exist in PATH</string>
+    <string name="test1_1">su file exists in PATH</string>
+    <string name="test1_0">su file does not exist in PATH</string>
 
     <string name="test2">Check if the system file is modified by Magisk module</string>
     <string name="test2_0">No system file modified by Magisk module</string>
-    <string name="test2_1">Magisk module modified at least one system file</string>
-    <string name="test2_d">Unexpected</string>
+    <string name="test2_1">Magisk module modified %1$d system files</string>
 
-    <string name="test3">Detect the number of Magisk su processes</string>
-    <string name="test3_0">No running su process found</string>
-    <string name="test3_1">Unexpected</string>
-    <string name="test3_2">SElinux wrong, please ignore this result</string>
-    <string name="test3_3">This detection method does not support Android10+</string>
-    <string name="test3_d">Found %1$d running su processes</string>
-
-    <string name="test4">Check Magisk Hide working status</string>
-    <string name="test4_t">Magisk Hide is not working</string>
-    <string name="test4_f">Magisk Hide works fine</string>
-
-    <string name="test5">Check if SELinux policy is modified by Magisk</string>
-    <string name="test5_01">Unexpected</string>
-    <string name="test5_0">System does not support this detection method</string>
-    <string name="test5_1">No trace of modification found</string>
-    <string name="test5_2">SELinux policy has been modified</string>
-
-    <string name="test6">Check if init.rc is modified by Magisk</string>
-    <string name="test6_01">Unexpected</string>
-    <string name="test6_0">No trace of modification found</string>
-    <string name="test6_1">init.rc has been modified by Magisk</string>
-    <string name="test6_2">Need to restart to complete detection</string>
+    <string name="test3">Check Magisk Hide</string>
+    <string name="test3_1">Magisk Hide is enabled, pid %1$d</string>
+    <string name="test3_0">Not found Magisk Hide</string>
 
     <string name="display">%1$s\nTest results: %2$s</string>
     <string name="error">App been hacked</string>
+    <string name="test_e">Unexpected</string>
 
     <string name="save_log">Save log</string>
 </resources>
