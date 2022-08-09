@@ -5,6 +5,10 @@ Magisk Detector
 
 R.I.P. MagiskHide
 
+This project is archived, to test device integrity use momo: https://t.me/s/magiskalpha/517
+
+此项目已经停止维护，如需测试设备完整性，请使用momo： https://t.me/s/magiskalpha/517
+
 Getting Started
 ---------------
 
