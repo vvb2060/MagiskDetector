@@ -69,6 +69,7 @@ static int scan_maps(dev_t data_dev) {
 }
 
 static int scan_status() {
+    if (getppid() == 1) return -1;
     int pid = -1;
     char line[PATH_MAX];
     char maps[] = "/proc/self/status";
